@@ -11,7 +11,7 @@ A simple confirmation dialog of an element click action.
 
 Popconfirm is similar to Popover. So for some duplicated attributes, please refer to the documentation of Popover.
 
-:::demo Only `title` attribute is avaliable in Popconfirm, `content` will be ignored.
+:::demo Only `title` attribute is available in Popconfirm, `content` will be ignored.
 
 popconfirm/basic-usage
 
@@ -39,7 +39,7 @@ popconfirm/trigger-event
 
 ## Attributes
 
-| Attribute           | Description                                                                         | Type                  | Accepted Values                                    | Default         |
+| Name                | Description                                                                         | Type                  | Accepted Values                                    | Default         |
 | ------------------- | ----------------------------------------------------------------------------------- | --------------------- | -------------------------------------------------- | --------------- |
 | title               | Title                                                                               | String                | —                                                  | —               |
 | confirm-button-text | Confirm button text                                                                 | String                | —                                                  | —               |
@@ -61,7 +61,7 @@ popconfirm/trigger-event
 
 ## Events
 
-| Event Name | Description                        | Parameters |
-| ---------- | ---------------------------------- | ---------- |
-| confirm    | triggers when click confirm button | —          |
-| cancel     | triggers when click cancel button  | —          |
+| Name    | Description                        | Parameters |
+| ------- | ---------------------------------- | ---------- |
+| confirm | triggers when click confirm button | —          |
+| cancel  | triggers when click cancel button  | —          |

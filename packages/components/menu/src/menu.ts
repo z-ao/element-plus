@@ -17,6 +17,7 @@ import { More } from '@element-plus/icons-vue'
 import {
   buildProps,
   definePropType,
+  flattedChildren,
   isObject,
   isString,
   mutable,
@@ -29,7 +30,7 @@ import { useMenuCssVar } from './use-menu-css-var'
 
 import type { MenuItemClicked, MenuProvider, SubMenuProvider } from './types'
 import type { NavigationFailure, Router } from 'vue-router'
-import type { ExtractPropTypes, VNode, VNodeNormalizedChildren } from 'vue'
+import type { ExtractPropTypes, VNode, VNodeArrayChildren } from 'vue'
 import type { UseResizeObserverReturn } from '@vueuse/core'
 
 export const menuProps = buildProps({
@@ -115,7 +116,7 @@ export default defineComponent({
     const activeIndex = ref<MenuProvider['activeIndex']>(props.defaultActive)
     const items = ref<MenuProvider['items']>({})
     const subMenus = ref<MenuProvider['subMenus']>({})
-
+    let activeItemFirstOpend = true
     // computed
     const isMenuPopup = computed<MenuProvider['isMenuPopup']>(() => {
       return (
@@ -127,16 +128,34 @@ export default defineComponent({
     // methods
     const initMenu = () => {
       const activeItem = activeIndex.value && items.value[activeIndex.value]
-      if (!activeItem || props.mode === 'horizontal' || props.collapse) return
+      if (
+        !activeItem ||
+        props.mode === 'horizontal' ||
+        props.collapse ||
+        (props.uniqueOpened && !activeItemFirstOpend)
+      )
+        return
 
       const indexPath = activeItem.indexPath
 
       // 展开该菜单项的路径上所有子菜单
       // expand all subMenus of the menu item
-      indexPath.forEach((index) => {
-        const subMenu = subMenus.value[index]
-        subMenu && openMenu(index, subMenu.indexPath)
-      })
+      const openAllActiveItem = () => {
+        activeItemFirstOpend = false
+        indexPath.forEach((index) => {
+          const subMenu = subMenus.value[index]
+          subMenu && openMenu(index, subMenu.indexPath)
+        })
+      }
+
+      if (activeIndex.value === props.defaultActive && activeItemFirstOpend) {
+        openAllActiveItem()
+      } else {
+        // fix: #10431
+        if (indexPath.every((index) => openedMenus.value.includes(index))) {
+          openAllActiveItem()
+        }
+      }
     }
 
     const openMenu: MenuProvider['openMenu'] = (index, indexPath) => {
@@ -356,25 +375,12 @@ export default defineComponent({
       })
     }
 
-    const flattedChildren = (children: VNodeNormalizedChildren) => {
-      const vnodes = Array.isArray(children) ? children : [children]
-      const result: any[] = []
-      vnodes.forEach((child: any) => {
-        if (Array.isArray(child.children)) {
-          result.push(...flattedChildren(child.children))
-        } else {
-          result.push(child)
-        }
-      })
-      return result
-    }
-
     return () => {
-      let slot = slots.default?.() ?? []
+      let slot: VNodeArrayChildren = slots.default?.() ?? []
       const vShowMore: VNode[] = []
 
       if (props.mode === 'horizontal' && menu.value) {
-        const originalSlot = flattedChildren(slot)
+        const originalSlot = flattedChildren(slot) as VNodeArrayChildren
         const slotDefault =
           sliceIndex.value === -1
             ? originalSlot

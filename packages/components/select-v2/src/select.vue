@@ -17,7 +17,7 @@
       :popper-options="popperOptions"
       :fallback-placements="['bottom-start', 'top-start', 'right', 'left']"
       :effect="effect"
-      placement="bottom-start"
+      :placement="placement"
       pure
       :transition="`${nsSelectV2.namespace.value}-zoom-in-top`"
       trigger="click"
@@ -30,7 +30,7 @@
           ref="selectionRef"
           :class="[
             nsSelectV2.e('wrapper'),
-            nsSelectV2.is('focused', states.isComposing),
+            nsSelectV2.is('focused', states.isComposing || expanded),
             nsSelectV2.is('hovering', states.comboBoxHovering),
             nsSelectV2.is('filterable', filterable),
             nsSelectV2.is('disabled', selectDisabled),
@@ -254,10 +254,7 @@
               nsSelectV2.e('placeholder'),
               nsSelectV2.is(
                 'transparent',
-                states.isComposing ||
-                  (placeholder && multiple
-                    ? modelValue.length === 0
-                    : !hasModelValue)
+                multiple ? modelValue.length === 0 : !hasModelValue
               ),
             ]"
           >
@@ -350,6 +347,7 @@ export default defineComponent({
         ...toRefs(props),
         height: API.popupHeight,
       }),
+      popper: API.popper,
       onSelect: API.onSelect,
       onHover: API.onHover,
       onKeyboardNavigate: API.onKeyboardNavigate,
